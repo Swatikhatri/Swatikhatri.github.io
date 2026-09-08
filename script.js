@@ -94,6 +94,7 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
   const INK = "#16161D";
+  const LINE_WIDTH = 14; // matches the default custom-cursor dot size
   let strokes = [];
   let activeStroke = null;
 
@@ -111,24 +112,35 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
 
   function strokeStyle(){
     ctx.strokeStyle = INK;
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = LINE_WIDTH;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
   }
 
+  const midPoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+
+  // Draws (or redraws) an entire stroke as a smooth curve through
+  // its recorded points, rather than straight segments point-to-
+  // point — quadratic curves through each pair's midpoint is what
+  // removes the faceted/jagged look on fast mouse movement.
   function drawStroke(stroke){
     if (stroke.length === 0) return;
     strokeStyle();
     if (stroke.length === 1){
       ctx.beginPath();
-      ctx.arc(stroke[0].x, stroke[0].y, 1.25, 0, Math.PI * 2);
+      ctx.arc(stroke[0].x, stroke[0].y, LINE_WIDTH / 2, 0, Math.PI * 2);
       ctx.fillStyle = INK;
       ctx.fill();
       return;
     }
     ctx.beginPath();
     ctx.moveTo(stroke[0].x, stroke[0].y);
-    for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+    for (let i = 1; i < stroke.length - 1; i++){
+      const mid = midPoint(stroke[i], stroke[i + 1]);
+      ctx.quadraticCurveTo(stroke[i].x, stroke[i].y, mid.x, mid.y);
+    }
+    const last = stroke[stroke.length - 1];
+    ctx.lineTo(last.x, last.y);
     ctx.stroke();
   }
 
@@ -159,12 +171,12 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
   document.addEventListener("pointermove", (e) => {
     if (!activeStroke) return;
     activeStroke.push({ x: e.pageX, y: e.pageY });
-    const n = activeStroke.length;
-    strokeStyle();
-    ctx.beginPath();
-    ctx.moveTo(activeStroke[n - 2].x, activeStroke[n - 2].y);
-    ctx.lineTo(activeStroke[n - 1].x, activeStroke[n - 1].y);
-    ctx.stroke();
+    // redrawing the whole stroke each move (not just the new
+    // segment) keeps it consistently smooth end-to-end; already-
+    // inked pixels are solid black so re-stroking them is a no-op
+    // visually, and stroke lengths here are short enough that this
+    // stays cheap.
+    drawStroke(activeStroke);
   });
 
   function endStroke(){
