@@ -91,6 +91,20 @@ p{ margin: 0; }
   transition: width .1s linear;
 }
 
+/* ---------- free-draw canvas ---------- */
+/* Sized to the full document in JS; pointer-events: none so it
+   never intercepts clicks — links and buttons underneath always
+   work. Drawing is handled via document-level pointer listeners
+   in script.js, which only start a stroke off of interactive
+   elements. */
+#drawCanvas{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
 /* ---------- header ---------- */
 .site-header{
   position: sticky;
@@ -182,19 +196,18 @@ p{ margin: 0; }
 .cta{
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   width: fit-content;
-  padding: 13px 24px;
+  padding: 13px 26px;
   background: var(--ink);
   color: var(--paper);
   border-radius: 999px;
   font-size: 14.5px;
   font-weight: 600;
-  transition: background .25s ease, transform .25s ease;
+  transition: background .25s ease, color .25s ease;
 }
 .cta:hover{
   background: var(--rose);
-  transform: translateY(-2px);
+  color: var(--ink);
 }
 
 .hero-stats{
