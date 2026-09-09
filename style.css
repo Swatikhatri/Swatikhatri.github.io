@@ -60,21 +60,10 @@ p{ margin: 0; }
   transition: width .28s cubic-bezier(.2,.8,.2,1), height .28s cubic-bezier(.2,.8,.2,1), background .28s ease;
   display: none;
 }
-.cursor span{
-  opacity: 0;
-  font-size: 12px;
-  font-family: var(--sans);
-  font-weight: 600;
-  color: var(--paper);
-  letter-spacing: 0.02em;
-  transition: opacity .2s ease;
-  white-space: nowrap;
-}
 .cursor.active{
   width: 68px; height: 68px;
   background: var(--rose);
 }
-.cursor.active span{ opacity: 1; }
 
 @media (hover: hover) and (pointer: fine){
   .cursor{ display: flex; align-items: center; justify-content: center; }
@@ -96,12 +85,15 @@ p{ margin: 0; }
    never intercepts clicks — links and buttons underneath always
    work. Drawing is handled via document-level pointer listeners
    in script.js, which only start a stroke off of interactive
-   elements. */
+   elements. Negative z-index keeps strokes behind every normal
+   page element (cards, text, images) while still painting above
+   the body background, since nothing else on the page sets a
+   z-index of its own. */
 #drawCanvas{
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 40;
+  z-index: -1;
   pointer-events: none;
 }
 
@@ -301,12 +293,6 @@ body.loaded .hero-headline .line span{ transform: translateY(0); }
   max-width: 16ch;
   margin: 4px 0 14px;
 }
-.work-note{
-  color: var(--muted);
-  font-size: 13.5px;
-  max-width: 46ch;
-}
-
 .work-grid{
   display: grid;
   grid-template-columns: repeat(6, 1fr);

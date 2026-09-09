@@ -6,17 +6,17 @@
 // swap card-media for a real <img> once you have screenshots.
 // ============================================================
 const projects = [
-  { img: "./images/project-1.jpg", name: "Yegertek", url: "https://www.yegertek.com/", blurb: "B2B technology website for a customer loyalty and engagement solutions provider.", tools: ["Wordpress"], size: "featured", a: "#F6E7E9", b: "#EFD9DE" },
+  { img: "./images/project-1.jpg", name: "Yegertek", url: "https://www.yegertek.com/", blurb: "B2B technology website for a customer loyalty and engagement solutions provider.", tools: ["WordPress"], size: "featured", a: "#F6E7E9", b: "#EFD9DE" },
   { img: "./images/project-2.jpg", name: "Dhanlabh Logistics", url: "https://dhanlabhlogistics.com/", blurb: "Global logistics and freight forwarding website for a full-service transportation provider.", tools: ["WordPress"], size: "", a: "#DCE9E4", b: "#C9DDD5" },
   { img: "./images/project-3.jpg", name: "Great Explorations", url: "https://greatex.org/", blurb: "Interactive website for a children's museum focused on hands-on learning and family experiences.", tools: ["Figma", "WordPress"], size: "", a: "#EDE7DC", b: "#E3D9C6" },
   { img: "./images/project-4.jpg", name: "Jaina Convention", url: "https://jainaconvention.org/", blurb: "Event-focused website for a biennial Jain community convention.", tools: ["Shopify", "Canva"], size: "small", a: "#F6E7E9", b: "#F1D6DC" },
   { img: "./images/project-5.jpg", name: "Kavi Overseas", url: "https://kavioverseas.com/", blurb: "Education consultancy website for students pursuing MBBS and higher education abroad.", tools: ["WordPress", "Figma"], size: "small", a: "#DCE9E4", b: "#CFE3DC" },
-  { img: "./images/project-6.jpg", name: "Funvilla", url: "https://funvilla.ca/", blurb: "Play-focused website for an indoor entertainment center and kid's birthday venue.", tools: ["Wordpress", "Figma"], size: "featured", a: "#EDE7DC", b: "#F0E2D8" },
-  { img: "./images/project-7.jpg", name: "Connect St. Petersburg", url: "https://connectstpete.com/", blurb: "Community-focused coworking website for networking, leadership, and business events.", tools: ["Wordpress", "Figma"], size: "", a: "#F6E7E9", b: "#EAD9DF" },
+  { img: "./images/project-6.jpg", name: "Funvilla", url: "https://funvilla.ca/", blurb: "Play-focused website for an indoor entertainment center and kid's birthday venue.", tools: ["WordPress", "Figma"], size: "featured", a: "#EDE7DC", b: "#F0E2D8" },
+  { img: "./images/project-7.jpg", name: "Connect St. Petersburg", url: "https://connectstpete.com/", blurb: "Community-focused coworking website for networking, leadership, and business events.", tools: ["WordPress", "Figma"], size: "", a: "#F6E7E9", b: "#EAD9DF" },
   { img: "./images/project-8.jpg", name: "StampTie", url: "https://stamptie.com/", blurb: "Digital loyalty platform offering simple QR-based rewards for businesses.", tools: ["WordPress"], size: "small", a: "#DCE9E4", b: "#D5E5DD" },
   { img: "./images/project-9.jpg", name: "BCS Laundry", url: "https://bcslaundry.com/", blurb: "Commercial laundry website serving hotels, holiday lets, and hospitality businesses.", tools: ["Figma", "WordPress"], size: "", a: "#EDE7DC", b: "#E7DACB" },
-  { img: "./images/project-10.jpg", name: "Ecolive India", url: "https://ecoliveindia.com/", blurb: "Multi-vendor marketplace connecting local businesses with online shoppers.", tools: ["Wordpress", "Illustrator"], size: "small", a: "#F6E7E9", b: "#F3DEE3" },
-  { img: "./images/project-11.jpg", name: "Arham Technosoft", url: "https://arhamtechnosoft.com/", blurb: "Corporate website for an AI-powered web, mobile, and digital solutions company.", tools: ["Wordpress", "Figma"], size: "featured", a: "#DCE9E4", b: "#D0E1D9" },
+  { img: "./images/project-10.jpg", name: "Ecolive India", url: "https://ecoliveindia.com/", blurb: "Multi-vendor marketplace connecting local businesses with online shoppers.", tools: ["WordPress", "Illustrator"], size: "small", a: "#F6E7E9", b: "#F3DEE3" },
+  { img: "./images/project-11.jpg", name: "Arham Technosoft", url: "https://arhamtechnosoft.com/", blurb: "Corporate website for an AI-powered web, mobile, and digital solutions company.", tools: ["WordPress", "Figma"], size: "featured", a: "#DCE9E4", b: "#D0E1D9" },
 ];
 
 function initials(name){
@@ -28,7 +28,7 @@ function renderProjects(){
   grid.innerHTML = projects.map(p => `
     <a class="card reveal ${p.size}" href="${p.url}" style="--card-a:${p.a}; --card-b:${p.b}" target="_blank" rel="noopener">
       <div class="card-media">
-        <img class="card-img" src="${p.img}">
+        <img class="card-img" src="${p.img}" alt="${p.name} website screenshot" loading="lazy">
         <span class="initials">${initials(p.name)}</span>
         <div class="tag-row">
           ${p.tools.map(t => `<span class="tag">${t}</span>`).join("")}
@@ -98,6 +98,7 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
   const LINE_WIDTH = 14; // matches the default custom-cursor dot size
   let strokes = [];
   let activeStroke = null;
+  let signature = null; // { pathData } — an SVG path string once the intro has drawn it
 
   function sizeCanvas(){
     const dpr = window.devicePixelRatio || 1;
@@ -148,6 +149,30 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
   function redraw(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     strokes.forEach(drawStroke);
+    if (signature) drawSignaturePath(signature);
+  }
+
+  // fills the glyph outlines straight from the font — used once the
+  // intro's outline-trace animation has finished, and again on every
+  // later redraw() (e.g. window resize)
+  function drawSignaturePath({ pathData }){
+    ctx.fillStyle = INK;
+    ctx.fill(new Path2D(pathData));
+  }
+
+  // straight-line polyline through already-dense, curve-sampled
+  // points — unlike drawStroke() this skips the midpoint quadratic
+  // smoothing, which is for raw/jagged mouse input, not needed here
+  function drawPolyline(points, width){
+    if (points.length < 2) return;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.stroke();
   }
 
   let resizeTimer;
@@ -187,6 +212,141 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
   }
   document.addEventListener("pointerup", endStroke);
   document.addEventListener("pointercancel", endStroke);
+
+  // ---------- glyph-outline flattening ----------
+  // Converts a font's bezier curve commands into dense point arrays,
+  // so the signature can be traced as an actual sequence of lines and
+  // curves — not revealed from a pre-rendered block of text.
+  function flattenCubic(p0, c1, c2, p1, steps){
+    const pts = [];
+    for (let i = 1; i <= steps; i++){
+      const t = i / steps, mt = 1 - t;
+      pts.push({
+        x: mt * mt * mt * p0.x + 3 * mt * mt * t * c1.x + 3 * mt * t * t * c2.x + t * t * t * p1.x,
+        y: mt * mt * mt * p0.y + 3 * mt * mt * t * c1.y + 3 * mt * t * t * c2.y + t * t * t * p1.y,
+      });
+    }
+    return pts;
+  }
+
+  function flattenQuad(p0, c, p1, steps){
+    const pts = [];
+    for (let i = 1; i <= steps; i++){
+      const t = i / steps, mt = 1 - t;
+      pts.push({
+        x: mt * mt * p0.x + 2 * mt * t * c.x + t * t * p1.x,
+        y: mt * mt * p0.y + 2 * mt * t * c.y + t * t * p1.y,
+      });
+    }
+    return pts;
+  }
+
+  // opentype.js glyph commands -> one point array per contour (a
+  // glyph like "A" has an outer contour plus an inner counter, each
+  // traced as its own stroke, in the order the font data defines)
+  function buildContours(commands){
+    const contours = [];
+    let current = null;
+    let cursor = { x: 0, y: 0 };
+    commands.forEach((cmd) => {
+      if (cmd.type === "M"){
+        if (current && current.length > 1) contours.push(current);
+        current = [{ x: cmd.x, y: cmd.y }];
+        cursor = { x: cmd.x, y: cmd.y };
+      } else if (cmd.type === "L"){
+        current.push({ x: cmd.x, y: cmd.y });
+        cursor = { x: cmd.x, y: cmd.y };
+      } else if (cmd.type === "C"){
+        current.push(...flattenCubic(cursor, { x: cmd.x1, y: cmd.y1 }, { x: cmd.x2, y: cmd.y2 }, { x: cmd.x, y: cmd.y }, 14));
+        cursor = { x: cmd.x, y: cmd.y };
+      } else if (cmd.type === "Q"){
+        current.push(...flattenQuad(cursor, { x: cmd.x1, y: cmd.y1 }, { x: cmd.x, y: cmd.y }, 10));
+        cursor = { x: cmd.x, y: cmd.y };
+      } else if (cmd.type === "Z" && current && current.length){
+        current.push(current[0]);
+      }
+    });
+    if (current && current.length > 1) contours.push(current);
+    return contours;
+  }
+
+  // ---------- auto-signature intro ----------
+  // Signs the page in the bottom-right corner of the hero, the way a
+  // designer signs the corner of a finished piece — traced contour by
+  // contour from the actual glyph outlines of the supplied signature
+  // font, then settled into solid ink once fully drawn.
+  async function playSignature(){
+    const heroEl = document.querySelector(".hero");
+    if (!heroEl || activeStroke || typeof opentype === "undefined") return;
+
+    let font;
+    try {
+      font = await opentype.load("./fonts/AutografPersonalUseOnly-mOBm.ttf");
+    } catch (e) {
+      return; // no font available — skip the intro rather than break the page
+    }
+    if (activeStroke) return; // a stroke may have started while the font was loading
+
+    const cs = getComputedStyle(heroEl);
+    const r = heroEl.getBoundingClientRect();
+    const paddingRight = parseFloat(cs.paddingRight) || 24;
+    const paddingBottom = parseFloat(cs.paddingBottom) || 60;
+    const fontSize = Math.max(34, Math.min(64, paddingBottom * 0.62));
+    const text = "SWATI";
+
+    const advance = font.getAdvanceWidth(text, fontSize);
+    const leftX = r.right + window.scrollX - paddingRight - advance;
+    const baseY = r.bottom + window.scrollY - paddingBottom * 0.32;
+
+    const path = font.getPath(text, leftX, baseY, fontSize);
+    const pathData = path.toPathData(2);
+    const contours = buildContours(path.commands);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || contours.length === 0){
+      signature = { pathData };
+      redraw();
+      return;
+    }
+
+    const traceWidth = Math.max(1.6, fontSize * 0.045);
+    const totalPoints = contours.reduce((sum, c) => sum + c.length, 0) || 1;
+    const totalDuration = 1700;
+
+    let contourIndex = 0;
+    let contourStart = performance.now();
+
+    (function step(now){
+      if (activeStroke) return; // don't fight a stroke the visitor is actually drawing
+      const contour = contours[contourIndex];
+      const contourDuration = Math.max(120, totalDuration * (contour.length / totalPoints));
+      const p = Math.min(1, (now - contourStart) / contourDuration);
+      const pointCount = Math.max(2, Math.round(contour.length * p));
+
+      redraw();
+      for (let i = 0; i < contourIndex; i++) drawPolyline(contours[i], traceWidth);
+      drawPolyline(contour.slice(0, pointCount), traceWidth);
+
+      if (p < 1){
+        requestAnimationFrame(step);
+        return;
+      }
+      contourIndex++;
+      if (contourIndex < contours.length){
+        contourStart = now;
+        requestAnimationFrame(step);
+      } else {
+        // fully traced — settle into solid ink, same as a finished pen
+        // stroke, and remember it so redraw() (e.g. on window resize)
+        // replays the filled letterforms directly
+        signature = { pathData };
+        redraw();
+      }
+    })(contourStart);
+  }
+
+  const scheduleSignature = () => setTimeout(playSignature, 1600);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleSignature);
+  else window.addEventListener("load", scheduleSignature);
 })();
 
 // ---------- custom cursor + card magnetism ----------
