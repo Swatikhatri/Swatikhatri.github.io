@@ -84,6 +84,36 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 document.querySelectorAll(".reveal").forEach(el => io.observe(el));
 
+// ---------- smooth scroll (mouse wheel) ----------
+// A plain mouse wheel scrolls in big fixed jumps by design, unlike a
+// trackpad's continuous motion — Lenis intercepts wheel input and
+// animates it, leaving touch/trackpad scrolling native. Skipped under
+// reduced motion, and simply does nothing if the CDN script fails.
+if (typeof Lenis !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const lenis = new Lenis({
+    duration: 1.1,
+    smoothWheel: true,
+    syncTouch: false, // leave native touch scrolling alone
+  });
+  function raf(time){
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  // hand anchor-link navigation (nav, the logo mark, the hero CTA) to
+  // the same smooth scroll, offset clear of the sticky header
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", (e) => {
+      const id = link.getAttribute("href").slice(1);
+      const target = id ? document.getElementById(id) : document.body;
+      if (!target) return;
+      e.preventDefault();
+      lenis.scrollTo(target, { offset: -90 });
+    });
+  });
+}
+
 // ---------- freehand draw canvas ----------
 // A full-document canvas visitors can doodle on in black ink.
 // It's pointer-events: none (see CSS), so every click still reaches
@@ -99,6 +129,7 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
   let strokes = [];
   let activeStroke = null;
   let signature = null; // { pathData } — an SVG path string once the intro has drawn it
+  let dismissDrawHint = null; // set once the typed hint is playing, so a real stroke can cut it short
 
   function sizeCanvas(){
     const dpr = window.devicePixelRatio || 1;
@@ -190,6 +221,7 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
     if (e.pointerType !== "mouse" || e.button !== 0) return;
     if (isInteractive(e.target)) return;
     e.preventDefault(); // stop native text-selection drag
+    if (dismissDrawHint) dismissDrawHint(); // they found it — stop explaining
     activeStroke = [{ x: e.pageX, y: e.pageY }];
     drawStroke(activeStroke);
   });
@@ -347,6 +379,43 @@ document.querySelectorAll(".reveal").forEach(el => io.observe(el));
   const scheduleSignature = () => setTimeout(playSignature, 1600);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleSignature);
   else window.addEventListener("load", scheduleSignature);
+
+  // ---------- draw-hint typewriter ----------
+  // A one-time typed caption, timed just after the signature finishes
+  // tracing — the page draws its own name, then explains what just
+  // happened. Cut short the moment a visitor starts a real stroke
+  // (see the dismissDrawHint() call in the pointerdown handler above).
+  function typeHint(){
+    const hintEl = document.getElementById("drawHint");
+    const textEl = document.getElementById("drawHintText");
+    if (!hintEl || !textEl) return;
+    const message = "psst — this whole page is a canvas. try drawing on it.";
+    hintEl.classList.add("visible");
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      textEl.textContent = message;
+      setTimeout(() => hintEl.classList.remove("visible"), 4500);
+      return;
+    }
+
+    let i = 0;
+    const typeSpeed = 32;
+    const timer = setInterval(() => {
+      i++;
+      textEl.textContent = message.slice(0, i);
+      if (i >= message.length){
+        clearInterval(timer);
+        setTimeout(() => hintEl.classList.remove("visible"), 3800);
+      }
+    }, typeSpeed);
+
+    dismissDrawHint = () => {
+      clearInterval(timer);
+      hintEl.classList.remove("visible");
+    };
+  }
+
+  setTimeout(typeHint, 3900);
 })();
 
 // ---------- custom cursor + card magnetism ----------

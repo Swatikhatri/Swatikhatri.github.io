@@ -19,7 +19,8 @@
 }
 
 *{ box-sizing: border-box; }
-html{ scroll-behavior: smooth; }
+/* smooth scrolling (wheel + anchor links) is handled by Lenis in
+   script.js — leaving this on too would fight its own animation */
 
 body{
   margin:0;
@@ -95,6 +96,40 @@ p{ margin: 0; }
   left: 0;
   z-index: -1;
   pointer-events: none;
+}
+
+/* ---------- draw hint ---------- */
+.draw-hint{
+  position: fixed;
+  top: 92px;
+  right: 20px;
+  z-index: 50;
+  max-width: min(70vw, 360px);
+  pointer-events: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--rose);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 14px;
+  box-shadow: 0 6px 20px rgba(22,22,29,0.08);
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+.draw-hint.visible{ opacity: 1; }
+.draw-hint-caret{
+  display: inline-block;
+  width: 1px;
+  height: 0.9em;
+  margin-left: 2px;
+  background: currentColor;
+  vertical-align: -0.1em;
+  animation: caret-blink 1s step-end infinite;
+}
+@keyframes caret-blink{
+  50%{ opacity: 0; }
 }
 
 /* ---------- header ---------- */
