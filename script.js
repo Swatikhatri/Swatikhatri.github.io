@@ -6,17 +6,17 @@
 // swap card-media for a real <img> once you have screenshots.
 // ============================================================
 const projects = [
-  { name: "Marigold & Co.", url: "#", blurb: "Brand site and online store for a small-batch skincare line.", tools: ["Shopify", "Figma"], size: "featured", a: "#F6E7E9", b: "#EFD9DE" },
-  { name: "Northside Dental", url: "#", blurb: "Clean, appointment-focused site for a family dental practice.", tools: ["WordPress"], size: "", a: "#DCE9E4", b: "#C9DDD5" },
-  { name: "Studio Loom", url: "#", blurb: "Portfolio and booking site for an interior styling studio.", tools: ["Figma", "HTML & CSS"], size: "", a: "#EDE7DC", b: "#E3D9C6" },
-  { name: "Bramble Bakery", url: "#", blurb: "Menu-led storefront with online ordering for a local bakery.", tools: ["Shopify", "Canva"], size: "small", a: "#F6E7E9", b: "#F1D6DC" },
-  { name: "Verve Fitness", url: "#", blurb: "Class schedules, trainer bios and sign-up flow for a boutique gym.", tools: ["WordPress", "Photoshop"], size: "small", a: "#DCE9E4", b: "#CFE3DC" },
-  { name: "Halcyon Home", url: "#", blurb: "Product catalogue and lookbook for a home-goods brand.", tools: ["Shopify", "Illustrator"], size: "featured", a: "#EDE7DC", b: "#F0E2D8" },
-  { name: "Paper & Pine", url: "#", blurb: "Stationery brand site with a hand-illustrated identity.", tools: ["Illustrator", "HTML & CSS"], size: "", a: "#F6E7E9", b: "#EAD9DF" },
-  { name: "The Corner Cafe", url: "#", blurb: "One-page site built around a printable, always-current menu.", tools: ["Canva", "WordPress"], size: "small", a: "#DCE9E4", b: "#D5E5DD" },
-  { name: "Kestrel Coaching", url: "#", blurb: "Personal-brand site for a career coach, built around booking.", tools: ["Figma", "WordPress"], size: "", a: "#EDE7DC", b: "#E7DACB" },
-  { name: "Bloom Florist", url: "#", blurb: "Seasonal storefront with delivery-area checkout logic.", tools: ["Shopify", "Photoshop"], size: "small", a: "#F6E7E9", b: "#F3DEE3" },
-  { name: "Ledger & Co. Studio", url: "#", blurb: "Portfolio site for a small design-and-print studio.", tools: ["Figma", "Illustrator", "HTML & CSS"], size: "featured", a: "#DCE9E4", b: "#D0E1D9" },
+  { img: "./images/project-1.jpg", name: "Yegertek", url: "https://www.yegertek.com/", blurb: "B2B technology website for a customer loyalty and engagement solutions provider.", tools: ["Wordpress"], size: "featured", a: "#F6E7E9", b: "#EFD9DE" },
+  { img: "./images/project-2.jpg", name: "Dhanlabh Logistics", url: "https://dhanlabhlogistics.com/", blurb: "Global logistics and freight forwarding website for a full-service transportation provider.", tools: ["WordPress"], size: "", a: "#DCE9E4", b: "#C9DDD5" },
+  { img: "./images/project-3.jpg", name: "Great Explorations", url: "https://greatex.org/", blurb: "Interactive website for a children's museum focused on hands-on learning and family experiences.", tools: ["Figma", "WordPress"], size: "", a: "#EDE7DC", b: "#E3D9C6" },
+  { img: "./images/project-4.jpg", name: "Jaina Convention", url: "https://jainaconvention.org/", blurb: "Event-focused website for a biennial Jain community convention.", tools: ["Shopify", "Canva"], size: "small", a: "#F6E7E9", b: "#F1D6DC" },
+  { img: "./images/project-5.jpg", name: "Kavi Overseas", url: "https://kavioverseas.com/", blurb: "Education consultancy website for students pursuing MBBS and higher education abroad.", tools: ["WordPress", "Figma"], size: "small", a: "#DCE9E4", b: "#CFE3DC" },
+  { img: "./images/project-6.jpg", name: "Funvilla", url: "https://funvilla.ca/", blurb: "Play-focused website for an indoor entertainment center and kid's birthday venue.", tools: ["Wordpress", "Figma"], size: "featured", a: "#EDE7DC", b: "#F0E2D8" },
+  { img: "./images/project-7.jpg", name: "Connect St. Petersburg", url: "https://connectstpete.com/", blurb: "Community-focused coworking website for networking, leadership, and business events.", tools: ["Wordpress", "Figma"], size: "", a: "#F6E7E9", b: "#EAD9DF" },
+  { img: "./images/project-8.jpg", name: "StampTie", url: "https://stamptie.com/", blurb: "Digital loyalty platform offering simple QR-based rewards for businesses.", tools: ["WordPress"], size: "small", a: "#DCE9E4", b: "#D5E5DD" },
+  { img: "./images/project-9.jpg", name: "BCS Laundry", url: "https://bcslaundry.com/", blurb: "Commercial laundry website serving hotels, holiday lets, and hospitality businesses.", tools: ["Figma", "WordPress"], size: "", a: "#EDE7DC", b: "#E7DACB" },
+  { img: "./images/project-10.jpg", name: "Ecolive India", url: "https://ecoliveindia.com/", blurb: "Multi-vendor marketplace connecting local businesses with online shoppers.", tools: ["Wordpress", "Illustrator"], size: "small", a: "#F6E7E9", b: "#F3DEE3" },
+  { img: "./images/project-11.jpg", name: "Arham Technosoft", url: "https://arhamtechnosoft.com/", blurb: "Corporate website for an AI-powered web, mobile, and digital solutions company.", tools: ["Wordpress", "Figma"], size: "featured", a: "#DCE9E4", b: "#D0E1D9" },
 ];
 
 function initials(name){
@@ -28,6 +28,7 @@ function renderProjects(){
   grid.innerHTML = projects.map(p => `
     <a class="card reveal ${p.size}" href="${p.url}" style="--card-a:${p.a}; --card-b:${p.b}" target="_blank" rel="noopener">
       <div class="card-media">
+        <img class="card-img" src="${p.img}">
         <span class="initials">${initials(p.name)}</span>
         <div class="tag-row">
           ${p.tools.map(t => `<span class="tag">${t}</span>`).join("")}
